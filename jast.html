@@ -200,11 +200,24 @@
 
   <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
   
-  <input type="file" id="excelFile" accept=".xlsx, .xls">
-  <select id="sheetSelect"></select>
-  <select id="columnSelect"></select><br>
+<input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file" class="btn" style="width:auto;">
+<select id="sheetSelect" style="display:none;"></select>
+<select id="columnSelect" style="display:none;"></select><br>
+<script>
+   // Show/hide sheet/column selects based on Excel file loaded
+   const sheetSelect = document.getElementById('sheetSelect');
+   const columnSelect = document.getElementById('columnSelect');
+   document.getElementById('excelFile').addEventListener('change', function() {
+      if (this.files.length) {
+         sheetSelect.style.display = '';
+         columnSelect.style.display = '';
+      } else {
+         sheetSelect.style.display = 'none';
+         columnSelect.style.display = 'none';
+      }
+   });
+</script>
   
-  <button id="importExcelBtn" class="btn">Import Excel</button>
   <button id="searchBtn" class="btn">Search</button>
   
   <!-- Spinner + Progress -->
@@ -317,7 +330,7 @@
       }
     };
 
-    document.getElementById('importExcelBtn').onclick = function() {
+   document.getElementById('excelFile').onchange = function() {
       const fileInput = document.getElementById('excelFile');
       if (!fileInput.files.length) {
         alert("Please select an Excel file first.");

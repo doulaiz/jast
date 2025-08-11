@@ -420,6 +420,15 @@
 
       let completed = 0;
 
+      // Helper to bold search matches
+      function boldMatches(text, query) {
+        if (!text || !query) return text;
+        // Escape regex special chars in query
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'gi');
+        return text.replace(regex, match => `<b>${match}</b>`);
+      }
+
       for (const url of urls) {
         const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}+site:${encodeURIComponent(url)}`;
         try {
@@ -431,9 +440,9 @@
 
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${url}</td>
+            <td>${boldMatches(url, query)}</td>
             <td>${numResults}</td>
-            ${Array.from({ length: snippetCount }, (_, i) => `<td>${snippets[i] || ''}</td>`).join('')}
+            ${Array.from({ length: snippetCount }, (_, i) => `<td>${boldMatches(snippets[i] || '', query)}</td>`).join('')}
           `;
           tbody.appendChild(row);
         } catch (err) {

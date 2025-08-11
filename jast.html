@@ -77,13 +77,14 @@
     table {
       margin: 30px auto;
       border-collapse: collapse;
-      width: 80%;
+      width: 95%;
       font-size: 14px;
     }
     th, td {
       border: 1px solid #dadce0;
       padding: 8px;
       text-align: left;
+      vertical-align: top;
     }
     th {
       background-color: #f1f3f4;
@@ -138,7 +139,7 @@
 
   <h1>JAST</h1>
 
-  <input type="text" id="searchQuery" class="search-box" placeholder="text to search..."><br><br>
+  <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
   
   <input type="file" id="excelFile" accept=".xlsx, .xls">
   <select id="sheetSelect"></select>
@@ -150,9 +151,13 @@
   <table id="resultsTable" style="display:none;">
     <thead>
       <tr>
-        <th>Title</th>
-        <th>Snippet</th>
-        <th>Link</th>
+        <th>URL Used</th>
+        <th># of Results</th>
+        <th>Snippet 1</th>
+        <th>Snippet 2</th>
+        <th>Snippet 3</th>
+        <th>Snippet 4</th>
+        <th>Snippet 5</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -258,13 +263,12 @@
       console.log("Extracted URLs:", urls);
     }
 
-    document.getElementById('searchBtn').onclick = function() {
+    document.getElementById('searchBtn').onclick = async function() {
       const query = document.getElementById('searchQuery').value.trim();
       if (!query) {
         alert("Please enter a search term.");
         return;
       }
-      console.log("urls:", urls);
       if (!urls.length) {
         alert("No URLs loaded from Excel.");
         return;
@@ -273,31 +277,35 @@
         alert("Please set your API Key and Custom Search Engine ID in Settings.");
         return;
       }
-      const siteQuery = urls.map(u => `site:${u}`).join(" OR ");
-      const fullQuery = `${query} ${siteQuery}`;
-      
-      fetch(`https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(fullQuery)}`)
-        .then(res => res.json())
-        .then(data => {
-          const table = document.getElementById('resultsTable');
-          const tbody = table.querySelector('tbody');
-          tbody.innerHTML = '';
-          if (data.items) {
-            data.items.forEach(item => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${item.title}</td>
-                <td>${item.snippet}</td>
-                <td><a href="${item.link}" target="_blank">Visit</a></td>
-              `;
-              tbody.appendChild(row);
-            });
-            table.style.display = 'table';
-          } else {
-            alert("No results found.");
-          }
-        })
-        .catch(err => console.error(err));
+
+      const table = document.getElementById('resultsTable');
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = '';
+      table.style.display = 'table';
+
+      for (const url of urls) {
+        const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}+site:${encodeURIComponent(url)}`;
+        try {
+          const res = await fetch(searchUrl);
+          const data = await res.json();
+
+          const numResults = data.searchInformation?.totalResults || 0;
+          const snippets = data.items ? data.items.slice(0, 5).map(i => i.snippet) : [];
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${url}</td>
+            <td>${numResults}</td>
+            ${Array.from({ length: 5 }, (_, i) => `<td>${snippets[i] || ''}</td>`).join('')}
+          `;
+          tbody.appendChild(row);
+        } catch (err) {
+          console.error("Error fetching for URL:", url, err);
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${url}</td><td colspan="6">Error fetching results</td>`;
+          tbody.appendChild(row);
+        }
+      }
     };
   </script>
 

@@ -201,8 +201,8 @@
 <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
 
 <input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file" class="btn" style="width:auto;">
-<select id="sheetSelect" style="display:none;"></select>
-<select id="columnSelect" style="display:none;"></select><br>
+<select id="sheetSelect" style="display:none;" title="Choose which sheet from your Excel file to use."></select>
+<select id="columnSelect" style="display:none;" title="Choose which column from your Excel file to use."></select><br>
 <script>
    // Show/hide sheet/column selects based on Excel file loaded
    const sheetSelect = document.getElementById('sheetSelect');
@@ -290,10 +290,7 @@
          document.getElementById('infoModal').style.display = 'none';
        }
      });
-   </script>
 
-
-  <script>
     let workbook;
     let urls = [];
 
@@ -407,7 +404,7 @@
       // Build header dynamically
       theadRow.innerHTML = `<th>URL Used</th><th># of Results</th>`;
       for (let i = 1; i <= snippetCount; i++) {
-        theadRow.innerHTML += `<th>Snippet ${i}</th>`;
+        theadRow.innerHTML += `<th> </th>`;
       }
 
       tbody.innerHTML = '';

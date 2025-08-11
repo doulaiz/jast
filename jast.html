@@ -440,7 +440,8 @@
         console.log("Extracted URLs:", urls);
       }
 
-      document.getElementById("searchBtn").onclick = async function () {
+      document.getElementById("searchBtn").onclick = async function (event) {
+        event.preventDefault();
         const query = document.getElementById("searchQuery").value.trim();
         if (!query) {
           alert("Please enter a search term.");

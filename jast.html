@@ -13,20 +13,39 @@
       padding: 0;
       color: #202124;
     }
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #fff;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    #settingsBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #5f6368;
+    }
+    #settingsBtn:hover {
+      color: #202124;
+    }
     h1 {
       font-size: 60px;
       font-weight: 400;
       margin-top: 100px;
       margin-bottom: 40px;
       letter-spacing: 2px;
-      color: #4285F4; /* Google Blue */
+      color: #4285F4;
     }
     .search-box {
       display: inline-block;
       padding: 8px 14px;
       border: 1px solid #dfe1e5;
       border-radius: 24px;
-      box-shadow: none;
       font-size: 16px;
       width: 400px;
       outline: none;
@@ -69,9 +88,53 @@
     th {
       background-color: #f1f3f4;
     }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #dadce0;
+      width: 300px;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #202124;
+    }
+    .modal-content label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .modal-content button {
+      margin-top: 15px;
+      padding: 8px 14px;
+    }
   </style>
 </head>
 <body>
+
+  <header>
+    <button id="settingsBtn">⚙</button>
+  </header>
 
   <h1>JAST</h1>
 
@@ -95,9 +158,52 @@
     <tbody></tbody>
   </table>
 
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h2>Settings</h2>
+      <label for="apiKeyInput">Google API Key</label>
+      <input type="text" id="apiKeyInput">
+
+      <label for="cxInput">Custom Search Engine ID</label>
+      <input type="text" id="cxInput">
+
+      <button class="btn" id="saveSettingsBtn">Save</button>
+    </div>
+  </div>
+
   <script>
     let workbook;
     let urls = [];
+
+    // Load saved settings
+    let apiKey = localStorage.getItem('googleApiKey') || '';
+    let cx = localStorage.getItem('googleCx') || '';
+
+    // Settings modal logic
+    const modal = document.getElementById('settingsModal');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+    settingsBtn.onclick = () => {
+      document.getElementById('apiKeyInput').value = apiKey;
+      document.getElementById('cxInput').value = cx;
+      modal.style.display = 'block';
+    };
+
+    saveSettingsBtn.onclick = () => {
+      apiKey = document.getElementById('apiKeyInput').value.trim();
+      cx = document.getElementById('cxInput').value.trim();
+      localStorage.setItem('googleApiKey', apiKey);
+      localStorage.setItem('googleCx', cx);
+      modal.style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    };
 
     document.getElementById('importExcelBtn').onclick = function() {
       const fileInput = document.getElementById('excelFile');
@@ -162,8 +268,10 @@
         alert("No URLs loaded from Excel.");
         return;
       }
-      const apiKey = "YOUR_GOOGLE_API_KEY";
-      const cx = "YOUR_CUSTOM_SEARCH_ENGINE_ID";
+      if (!apiKey || !cx) {
+        alert("Please set your API Key and Custom Search Engine ID in Settings.");
+        return;
+      }
       const siteQuery = urls.map(u => `site:${u}`).join(" OR ");
       const fullQuery = `${query} ${siteQuery}`;
       

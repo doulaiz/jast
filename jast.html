@@ -197,8 +197,8 @@
    <span class="g3">S</span>
    <span class="g4">T</span>
 </h1>
-
-<input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
+<form>
+  <input type="text" id="searchQuery" class="search-box" placeholder="Search..." autocomplete="on"><br><br>
 
 <input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file" class="btn" style="width:auto;">
 <select id="sheetSelect" style="display:none;" title="Choose which sheet from your Excel file to use."></select>
@@ -218,9 +218,9 @@
    });
 </script>
 
-<button id="searchBtn" class="btn">Search</button>
+<button id="searchBtn" class="btn" type="submit">Search</button>
 <button id="exportBtn" class="btn" style="display:none;">Export to Excel</button>
-
+</form>
   <!-- Spinner + Progress -->
   <div class="spinner-container" id="spinnerContainer">
     <div class="spinner"></div>

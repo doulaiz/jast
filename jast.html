@@ -24,14 +24,14 @@
       align-items: center;
       z-index: 1000;
     }
-    #settingsBtn {
+    .menuBtn {
       background: none;
       border: none;
       cursor: pointer;
       font-size: 24px;
       color: #5f6368;
     }
-    #settingsBtn:hover {
+    .menuBtn:hover {
       color: #202124;
     }
     h1 {
@@ -50,11 +50,11 @@
       margin-bottom: 40px;
       font-weight: 700;
       letter-spacing: 1px;
-      }
-      .jast-title .g1 { color: #4285F4; } /* Blue */
-      .jast-title .g2 { color: #EA4335; } /* Red */
-      .jast-title .g3 { color: #FBBC05; } /* Yellow */
-      .jast-title .g4 { color: #34A853; } /* Green */
+    }
+    .jast-title .g1 { color: #4285F4; } /* Blue */
+    .jast-title .g2 { color: #EA4335; } /* Red */
+    .jast-title .g3 { color: #FBBC05; } /* Yellow */
+    .jast-title .g4 { color: #34A853; } /* Green */
     .search-box {
       display: inline-block;
       padding: 8px 14px;
@@ -187,7 +187,8 @@
 <body>
 
   <header>
-    <button id="settingsBtn">⚙</button>
+   <button id="settingsBtn" class="menuBtn" title="Settings">⚙</button>
+   <button id="infoBtn" class="menuBtn" title="Information">?</button>
   </header>
 
 <h1 class="jast-title" title="Just Another Search Tool">
@@ -238,9 +239,44 @@
       <label for="snippetCountInput">Number of Snippets</label>
       <input type="number" id="snippetCountInput" min="1" max="10">
 
-      <button class="btn" id="saveSettingsBtn">Save</button>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn" id="saveSettingsBtn">Save</button>
+      </div>
     </div>
   </div>
+
+   <!-- Info Modal -->
+   <div id="infoModal" class="modal">
+     <div class="modal-content">
+       <h2>About JAST</h2>
+       <p>
+         JAST (Just Another Search Tool) lets you search Google Custom Search for results from a list of URLs loaded from Excel. 
+         Configure your API key and CSE ID in Settings. Import an Excel file, select the sheet and column with URLs, enter a search term, and view results.
+       </p>
+       <div style="display: flex; justify-content: flex-end;">
+         <button class="btn" id="closeInfoBtn">Close</button>
+       </div>
+     </div>
+   </div>
+   <script>
+     const infoBtn = document.getElementById('infoBtn');
+     const infoModal = document.getElementById('infoModal');
+     const closeInfoBtn = document.getElementById('closeInfoBtn');
+     infoBtn.onclick = () => { infoModal.style.display = 'block'; };
+     closeInfoBtn.onclick = () => { infoModal.style.display = 'none'; };
+     window.addEventListener('click', function(event) {
+       if (event.target == infoModal) infoModal.style.display = 'none';
+     });
+
+     // ESC key closes modals
+     window.addEventListener('keydown', function(event) {
+       if (event.key === "Escape") {
+         document.getElementById('settingsModal').style.display = 'none';
+         document.getElementById('infoModal').style.display = 'none';
+       }
+     });
+   </script>
+
 
   <script>
     let workbook;

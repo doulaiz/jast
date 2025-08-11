@@ -138,7 +138,7 @@
 
   <h1>JAST</h1>
 
-  <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
+  <input type="text" id="searchQuery" class="search-box" placeholder="text to search..."><br><br>
   
   <input type="file" id="excelFile" accept=".xlsx, .xls">
   <select id="sheetSelect"></select>
@@ -264,6 +264,7 @@
         alert("Please enter a search term.");
         return;
       }
+      console.log("urls:", urls);
       if (!urls.length) {
         alert("No URLs loaded from Excel.");
         return;

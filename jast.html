@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JAST</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      color: #202124;
+    }
+    h1 {
+      font-size: 60px;
+      font-weight: 400;
+      margin-top: 100px;
+      margin-bottom: 40px;
+      letter-spacing: 2px;
+      color: #4285F4; /* Google Blue */
+    }
+    .search-box {
+      display: inline-block;
+      padding: 8px 14px;
+      border: 1px solid #dfe1e5;
+      border-radius: 24px;
+      box-shadow: none;
+      font-size: 16px;
+      width: 400px;
+      outline: none;
+      transition: box-shadow 0.2s;
+    }
+    .search-box:focus {
+      box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+      border-color: rgba(223, 225, 229, 0);
+    }
+    .btn {
+      background-color: #f8f9fa;
+      border: 1px solid #f8f9fa;
+      border-radius: 4px;
+      padding: 8px 16px;
+      margin: 8px;
+      font-size: 14px;
+      color: #3c4043;
+      cursor: pointer;
+    }
+    .btn:hover {
+      border: 1px solid #dadce0;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    }
+    select, input[type="file"] {
+      margin: 5px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    table {
+      margin: 30px auto;
+      border-collapse: collapse;
+      width: 80%;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #dadce0;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f3f4;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>JAST</h1>
+
+  <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
+  
+  <input type="file" id="excelFile" accept=".xlsx, .xls">
+  <select id="sheetSelect"></select>
+  <select id="columnSelect"></select><br>
+  
+  <button id="importExcelBtn" class="btn">Import Excel</button>
+  <button id="searchBtn" class="btn">Search</button>
+  
+  <table id="resultsTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Snippet</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let workbook;
+    let urls = [];
+
+    document.getElementById('importExcelBtn').onclick = function() {
+      const fileInput = document.getElementById('excelFile');
+      if (!fileInput.files.length) {
+        alert("Please select an Excel file first.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        workbook = XLSX.read(data, { type: 'array' });
+        const sheetSelect = document.getElementById('sheetSelect');
+        sheetSelect.innerHTML = '';
+        workbook.SheetNames.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          sheetSelect.appendChild(opt);
+        });
+        loadColumns();
+      };
+      reader.readAsArrayBuffer(fileInput.files[0]);
+    };
+
+    document.getElementById('sheetSelect').onchange = loadColumns;
+
+    function loadColumns() {
+      const sheetName = document.getElementById('sheetSelect').value;
+      if (!sheetName) return;
+      const sheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      const firstRow = json[0];
+      const colSelect = document.getElementById('columnSelect');
+      colSelect.innerHTML = '';
+      firstRow.forEach((colName, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = colName || `Column ${idx+1}`;
+        colSelect.appendChild(opt);
+      });
+      extractUrls();
+    }
+
+    document.getElementById('columnSelect').onchange = extractUrls;
+
+    function extractUrls() {
+      const sheetName = document.getElementById('sheetSelect').value;
+      const colIndex = parseInt(document.getElementById('columnSelect').value);
+      const sheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      urls = json.slice(1).map(row => row[colIndex]).filter(u => !!u);
+      console.log("Extracted URLs:", urls);
+    }
+
+    document.getElementById('searchBtn').onclick = function() {
+      const query = document.getElementById('searchQuery').value.trim();
+      if (!query) {
+        alert("Please enter a search term.");
+        return;
+      }
+      if (!urls.length) {
+        alert("No URLs loaded from Excel.");
+        return;
+      }
+      const apiKey = "YOUR_GOOGLE_API_KEY";
+      const cx = "YOUR_CUSTOM_SEARCH_ENGINE_ID";
+      const siteQuery = urls.map(u => `site:${u}`).join(" OR ");
+      const fullQuery = `${query} ${siteQuery}`;
+      
+      fetch(`https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(fullQuery)}`)
+        .then(res => res.json())
+        .then(data => {
+          const table = document.getElementById('resultsTable');
+          const tbody = table.querySelector('tbody');
+          tbody.innerHTML = '';
+          if (data.items) {
+            data.items.forEach(item => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${item.title}</td>
+                <td>${item.snippet}</td>
+                <td><a href="${item.link}" target="_blank">Visit</a></td>
+              `;
+              tbody.appendChild(row);
+            });
+            table.style.display = 'table';
+          } else {
+            alert("No results found.");
+          }
+        })
+        .catch(err => console.error(err));
+    };
+  </script>
+
+</body>
+</html>

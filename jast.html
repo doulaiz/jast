@@ -187,8 +187,8 @@
 <body>
 
   <header>
-   <button id="settingsBtn" class="menuBtn" title="Settings">⚙</button>
    <button id="infoBtn" class="menuBtn" title="Information">?</button>
+   <button id="settingsBtn" class="menuBtn" title="Settings">⚙</button>
   </header>
 
 <h1 class="jast-title" title="Just Another Search Tool">
@@ -198,8 +198,8 @@
    <span class="g4">T</span>
 </h1>
 
-  <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
-  
+<input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
+
 <input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file" class="btn" style="width:auto;">
 <select id="sheetSelect" style="display:none;"></select>
 <select id="columnSelect" style="display:none;"></select><br>
@@ -217,9 +217,10 @@
       }
    });
 </script>
-  
-  <button id="searchBtn" class="btn">Search</button>
-  
+
+<button id="searchBtn" class="btn">Search</button>
+<button id="exportBtn" class="btn" style="display:none;">Export to Excel</button>
+
   <!-- Spinner + Progress -->
   <div class="spinner-container" id="spinnerContainer">
     <div class="spinner"></div>
@@ -238,6 +239,7 @@
     </thead>
     <tbody></tbody>
   </table>
+
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
@@ -457,7 +459,19 @@
       }
 
       spinnerContainer.style.display = 'none';
+      document.getElementById('exportBtn').style.display = 'inline-block';
     };
+
+
+    // Export table to Excel
+    document.getElementById('exportBtn').onclick = function() {
+      const table = document.getElementById('resultsTable');
+      const ws = XLSX.utils.table_to_sheet(table);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Results');
+      XLSX.writeFile(wb, 'jast_results.xlsx');
+    }
+
   </script>
 
 </body>

@@ -22,6 +22,7 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      z-index: 1000;
     }
     #settingsBtn {
       background: none;
@@ -41,6 +42,18 @@
       letter-spacing: 2px;
       color: #4285F4;
     }
+    .jast-title {
+      font-family: 'Product Sans', Arial, sans-serif;
+      font-size: 60px;
+      font-weight: 500;
+      margin-top: 100px;
+      margin-bottom: 40px;
+      letter-spacing: 2px;
+      }
+      .jast-title .g1 { color: #4285F4; } /* Blue */
+      .jast-title .g2 { color: #EA4335; } /* Red */
+      .jast-title .g3 { color: #FBBC05; } /* Yellow */
+      .jast-title .g4 { color: #34A853; } /* Green */
     .search-box {
       display: inline-block;
       padding: 8px 14px;
@@ -88,6 +101,45 @@
     }
     th {
       background-color: #f1f3f4;
+    }
+    /* Spinner styles */
+    .spinner-container {
+      margin-top: 20px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4285F4;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .progress-text {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #5f6368;
+    }
+    /* Progress bar styles */
+    .progress-bar {
+      margin-top: 8px;
+      width: 200px;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #4285F4;
+      width: 0%;
+      transition: width 0.3s ease;
     }
     /* Modal Styles */
     .modal {
@@ -137,7 +189,12 @@
     <button id="settingsBtn">⚙</button>
   </header>
 
-  <h1>JAST</h1>
+<h1 class="jast-title">
+  <span class="g1">J</span>
+  <span class="g2">A</span>
+  <span class="g3">S</span>
+  <span class="g4">T</span>
+</h1>
 
   <input type="text" id="searchQuery" class="search-box" placeholder="Search..."><br><br>
   
@@ -148,16 +205,20 @@
   <button id="importExcelBtn" class="btn">Import Excel</button>
   <button id="searchBtn" class="btn">Search</button>
   
+  <!-- Spinner + Progress -->
+  <div class="spinner-container" id="spinnerContainer">
+    <div class="spinner"></div>
+    <div class="progress-text" id="progressText">0 / 0</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
   <table id="resultsTable" style="display:none;">
     <thead>
-      <tr>
+      <tr id="resultsHeader">
         <th>URL Used</th>
         <th># of Results</th>
-        <th>Snippet 1</th>
-        <th>Snippet 2</th>
-        <th>Snippet 3</th>
-        <th>Snippet 4</th>
-        <th>Snippet 5</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -173,6 +234,9 @@
       <label for="cxInput">Custom Search Engine ID</label>
       <input type="text" id="cxInput">
 
+      <label for="snippetCountInput">Number of Snippets</label>
+      <input type="number" id="snippetCountInput" min="1" max="10">
+
       <button class="btn" id="saveSettingsBtn">Save</button>
     </div>
   </div>
@@ -184,6 +248,7 @@
     // Load saved settings
     let apiKey = localStorage.getItem('googleApiKey') || '';
     let cx = localStorage.getItem('googleCx') || '';
+    let snippetCount = parseInt(localStorage.getItem('snippetCount') || '5', 10);
 
     // Settings modal logic
     const modal = document.getElementById('settingsModal');
@@ -193,14 +258,19 @@
     settingsBtn.onclick = () => {
       document.getElementById('apiKeyInput').value = apiKey;
       document.getElementById('cxInput').value = cx;
+      document.getElementById('snippetCountInput').value = snippetCount;
       modal.style.display = 'block';
     };
 
     saveSettingsBtn.onclick = () => {
       apiKey = document.getElementById('apiKeyInput').value.trim();
       cx = document.getElementById('cxInput').value.trim();
+      snippetCount = parseInt(document.getElementById('snippetCountInput').value.trim(), 10) || 5;
+
       localStorage.setItem('googleApiKey', apiKey);
       localStorage.setItem('googleCx', cx);
+      localStorage.setItem('snippetCount', snippetCount);
+
       modal.style.display = 'none';
     };
 
@@ -280,8 +350,25 @@
 
       const table = document.getElementById('resultsTable');
       const tbody = table.querySelector('tbody');
+      const theadRow = document.getElementById('resultsHeader');
+
+      // Build header dynamically
+      theadRow.innerHTML = `<th>URL Used</th><th># of Results</th>`;
+      for (let i = 1; i <= snippetCount; i++) {
+        theadRow.innerHTML += `<th>Snippet ${i}</th>`;
+      }
+
       tbody.innerHTML = '';
       table.style.display = 'table';
+
+      const spinnerContainer = document.getElementById('spinnerContainer');
+      const progressText = document.getElementById('progressText');
+      const progressFill = document.getElementById('progressFill');
+      spinnerContainer.style.display = 'flex';
+      progressText.textContent = `0 / ${urls.length}`;
+      progressFill.style.width = '0%';
+
+      let completed = 0;
 
       for (const url of urls) {
         const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}+site:${encodeURIComponent(url)}`;
@@ -290,22 +377,27 @@
           const data = await res.json();
 
           const numResults = data.searchInformation?.totalResults || 0;
-          const snippets = data.items ? data.items.slice(0, 5).map(i => i.snippet) : [];
+          const snippets = data.items ? data.items.slice(0, snippetCount).map(i => i.snippet) : [];
 
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${url}</td>
             <td>${numResults}</td>
-            ${Array.from({ length: 5 }, (_, i) => `<td>${snippets[i] || ''}</td>`).join('')}
+            ${Array.from({ length: snippetCount }, (_, i) => `<td>${snippets[i] || ''}</td>`).join('')}
           `;
           tbody.appendChild(row);
         } catch (err) {
           console.error("Error fetching for URL:", url, err);
           const row = document.createElement('tr');
-          row.innerHTML = `<td>${url}</td><td colspan="6">Error fetching results</td>`;
+          row.innerHTML = `<td>${url}</td><td colspan="${snippetCount + 1}">Error fetching results</td>`;
           tbody.appendChild(row);
         }
+        completed++;
+        progressText.textContent = `${completed} / ${urls.length}`;
+        progressFill.style.width = `${(completed / urls.length) * 100}%`;
       }
+
+      spinnerContainer.style.display = 'none';
     };
   </script>
 

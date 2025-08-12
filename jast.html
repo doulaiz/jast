@@ -232,6 +232,16 @@
         color: #888;
         font-size: 13px;
       }
+      .clickable-snippet {
+        cursor: pointer;
+      }
+      .snippet-link {
+        font-size: 12px;
+        color: #4285f4;
+        word-break: break-all;
+        text-decoration: none;
+        padding-top: 8px;
+      }
     </style>
   </head>
   <body>
@@ -545,7 +555,6 @@
 
         let completed = 0;
 
-
         for (const url of urls) {
           // Rate limit: max 100 requests per minute (1 request every 600ms)
           const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
@@ -567,19 +576,24 @@
             const numResults = data.searchInformation?.totalResults || 0;
             const snippets = data.items
               ? data.items.slice(0, snippetCount).map((i) => ({
-                 html: i.htmlSnippet,
-                 link: i.link
-               }))
+                  html: i.htmlSnippet,
+                  link: i.link,
+                }))
               : [];
 
             const row = document.createElement("tr");
             row.innerHTML = `
             <td>${url}</td>
             <td>${numResults}</td>
-            ${Array.from(
-              { length: snippetCount },
-              (_, i) =>
-               `<td class="clickable-snippet">${snippets[i] ? `<a href="${snippets[i].link}" target="_blank">${snippets[i].html}</a>` : ""}</td>`
+            ${Array.from({ length: snippetCount }, (_, i) =>
+              snippets[i]
+                ? `<td class="clickable-snippet" onclick="window.open('${snippets[i].link}', '_blank')">
+                    <div>${snippets[i].html}</div>
+                    <div class="snippet-link">
+                     <a href="${snippets[i].link}" target="_blank" >${snippets[i].link}</a>
+                    </div>
+                  </td>`
+                : `<td></td>`
             ).join("")}
           `;
             tbody.appendChild(row);

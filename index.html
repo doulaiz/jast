@@ -57,15 +57,21 @@
    <div id="settingsModal" class="modal">
       <div class="modal-content">
          <h2>Settings</h2>
-         <label for="snippetCountInput">Number of Snippets per search</label>
-         <input type="number" id="snippetCountInput" min="1" max="10" />
+         <label for="snippetCountInput">Number of snippets per search</label>
+         <div style="display: flex; justify-content: center;">
+            <input type="number" id="snippetCountInput" min="1" max="10" />
+         </div>
          <br />
          <br />
          <label for="apiKeyInput">Google API Key</label>
-         <input type="text" id="apiKeyInput" />
+          <div style="display: flex; justify-content: center;">
+            <input type="text" id="apiKeyInput" />
+          </div>
 
          <label for="cxInput">Custom Search Engine ID</label>
-         <input type="text" id="cxInput" />
+         <div style="display: flex; justify-content: center;">
+            <input type="text" id="cxInput" />
+         </div>
 
          <div style="display: flex; justify-content: flex-end">
             <button class="btn" id="saveSettingsBtn">Save</button>

@@ -43,7 +43,7 @@ let urls = [];
 
 // Load saved settings
 let apiKey = localStorage.getItem("googleApiKey") || "";
-let cx = localStorage.getItem("googleCx") || "";
+let cx = localStorage.getItem("googleCx") || "4aee28d38fc98c487"; // Default value of a working Cx
 let snippetCount = parseInt(localStorage.getItem("snippetCount") || "5", 10);
 
 // Settings modal logic
@@ -283,3 +283,8 @@ function showError(message) {
 document.getElementById('wbaLink').onclick = function () {
    window.open('https://www.worldbenchmarkingalliance.org/', '_blank');
 };
+
+document.getElementById('googleApiSite').onclick = function () {
+   window.open('https://developers.google.com/custom-search/v1/overview#prerequisites', '_blank');
+};
+

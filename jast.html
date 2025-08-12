@@ -529,6 +529,10 @@
           
           try {
             const res = await fetch(searchUrl);
+            if (res.status === 429) {
+              showError("Google says: Too many requests (error 429). Please check your API billing or try again later.");
+              throw new Error("Rate limit exceeded");
+            }
             const data = await res.json();
 
             const numResults = data.searchInformation?.totalResults || 0;
@@ -573,5 +577,18 @@
         XLSX.writeFile(wb, "jast_results.xlsx");
       };
     </script>
+
+   <div id="errorBox" style="display:none; margin:20px auto; max-width:600px; background:#fdecea; color:#b71c1c; border:1px solid #f5c6cb; border-radius:6px; padding:14px; font-size:15px; text-align:left;">
+   </div>
+   <script>
+      function showError(message) {
+         const errorBox = document.getElementById("errorBox");
+         errorBox.textContent = message;
+         errorBox.style.display = "block";
+         setTimeout(() => {
+            errorBox.style.display = "none";
+         }, 6000);
+      }
+   </script>
   </body>
 </html>

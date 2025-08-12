@@ -2,6 +2,9 @@
 
 A lightweight, single-page web app to batch-search Google Custom Search across a list of domains/URLs loaded from an Excel file, preview the top snippets, and export results back to Excel.
 
+## Try it here:
+https://doulaiz.github.io/jast/
+
 ## What it does
 
 - Import an Excel file (.xlsx/.xls)

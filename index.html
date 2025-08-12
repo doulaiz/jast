@@ -1,113 +1,98 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>JAST</title>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="jast.css" />
-  </head>
-  <body>
-    <header>
+
+<head>
+   <meta charset="UTF-8" />
+   <title>JAST</title>
+   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+   <link rel="stylesheet" href="jast.css" />
+</head>
+
+<body>
+   <header>
       <button id="infoBtn" class="menuBtn" title="Information">?</button>
       <button id="settingsBtn" class="menuBtn" title="Settings">⚙</button>
-    </header>
+   </header>
 
-    <h1 class="jast-title" title="Just Another Search Tool">
-      <span class="g1">J</span><span class="g2">A</span><span class="g3">S</span
-      ><span class="g4">T</span>
-    </h1>
-    <form>
-      <input
-        type="text"
-        id="searchQuery"
-        class="search-box"
-        placeholder="Search..."
-        autocomplete="on"
-      /><br /><br />
+   <h1 class="jast-title" title="Just Another Search Tool">
+      <span class="g1">J</span><span class="g2">A</span><span class="g3">S</span><span class="g4">T</span>
+   </h1>
 
-      <input
-        type="file"
-        id="excelFile"
-        accept=".xlsx, .xls"
-        title="Select Excel file"
-        class="btn"
-        style="width: auto"
-      />
-      <select
-        id="sheetSelect"
-        style="display: none"
-        title="Choose which sheet from your Excel file to use."
-      ></select>
-      <select
-        id="columnSelect"
-        style="display: none"
-        title="Choose which column from your Excel file to use."
-      ></select
-      ><br />
+   <form>
+      <input type="text" id="searchQuery" class="search-box" placeholder="Search..." autocomplete="on" />
+
+      <br /><br />
+
+      <input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file" class="btn"
+         style="width: auto" />
+      <select id="sheetSelect" style="display: none" title="Choose which sheet from your Excel file to use."></select>
+      <select id="columnSelect" style="display: none"
+         title="Choose which column from your Excel file to use."></select><br />
 
       <button id="searchBtn" class="btn" type="submit">Search</button>
       <button id="exportBtn" class="btn" style="display: none">
-        Export to Excel
+         Export to Excel
       </button>
-    </form>
-    <!-- Spinner + Progress -->
-    <div class="spinner-container" id="spinnerContainer">
+   </form>
+   <!-- Spinner + Progress -->
+   <div class="spinner-container" id="spinnerContainer">
       <div class="spinner"></div>
       <div class="progress-text" id="progressText">0 / 0</div>
       <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+         <div class="progress-fill" id="progressFill"></div>
       </div>
-    </div>
+   </div>
 
-    <table id="resultsTable" style="display: none">
+   <table id="resultsTable" style="display: none">
       <thead>
-        <tr id="resultsHeader">
-          <th>URL Used</th>
-          <th># of Results</th>
-        </tr>
+         <tr id="resultsHeader">
+            <th>URL Used</th>
+            <th># of Results</th>
+         </tr>
       </thead>
       <tbody></tbody>
-    </table>
+   </table>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
+   <!-- Settings Modal -->
+   <div id="settingsModal" class="modal">
       <div class="modal-content">
-        <h2>Settings</h2>
-        <label for="snippetCountInput">Number of Snippets per search</label>
-        <input type="number" id="snippetCountInput" min="1" max="10" />
-        <br />
-        <br />
-        <label for="apiKeyInput">Google API Key</label>
-        <input type="text" id="apiKeyInput" />
+         <h2>Settings</h2>
+         <label for="snippetCountInput">Number of Snippets per search</label>
+         <input type="number" id="snippetCountInput" min="1" max="10" />
+         <br />
+         <br />
+         <label for="apiKeyInput">Google API Key</label>
+         <input type="text" id="apiKeyInput" />
 
-        <label for="cxInput">Custom Search Engine ID</label>
-        <input type="text" id="cxInput" />
+         <label for="cxInput">Custom Search Engine ID</label>
+         <input type="text" id="cxInput" />
 
-        <div style="display: flex; justify-content: flex-end">
-          <button class="btn" id="saveSettingsBtn">Save</button>
-        </div>
+         <div style="display: flex; justify-content: flex-end">
+            <button class="btn" id="saveSettingsBtn">Save</button>
+         </div>
       </div>
-    </div>
+   </div>
 
-    <!-- Info Modal -->
-    <div id="infoModal" class="modal">
+   <!-- Info Modal -->
+   <div id="infoModal" class="modal">
       <div class="modal-content">
-        <h2>About JAST</h2>
-        <p>
-          JAST (Just Another Search Tool) lets you search Google Custom Search
-          for results from a list of URLs loaded from Excel. Configure your API
-          key and CSE ID in Settings. Import an Excel file, select the sheet and
-          column with URLs, enter a search term, and view results.
-        </p>
-        <div style="display: flex; justify-content: flex-end">
-          <button class="btn" id="closeInfoBtn">Close</button>
-        </div>
+         <h2>About JAST</h2>
+         <p>
+            JAST (Just Another Search Tool) lets you search Google Custom Search
+            for results from a list of URLs loaded from Excel. Configure your API
+            key and CSE ID in Settings. Import an Excel file, select the sheet and
+            column with URLs, enter a search term, and view results.
+         </p>
+         <div style="display: flex; justify-content: flex-end">
+            <button class="btn" id="closeInfoBtn">Close</button>
+         </div>
       </div>
-    </div>
-    <div id="errorBox" class="errorBox"></div>
-    <script src="jast.js"></script>
-    <footer>
+   </div>
+   <div id="errorBox" class="errorBox"></div>
+   <script src="jast.js"></script>
+   <footer>
       <span class="footer">JAST v2.0</span>
-    </footer>
-  </body>
+   </footer>
+</body>
+
 </html>

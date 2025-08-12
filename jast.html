@@ -198,6 +198,18 @@
         margin-top: 15px;
         padding: 8px 14px;
       }
+      .errorBox {
+        display: none;
+        margin: 20px auto;
+        max-width: 600px;
+        background: #fdecea;
+        color: #b71c1c;
+        border: 1px solid #f5c6cb;
+        border-radius: 6px;
+        padding: 14px;
+        font-size: 15px;
+        text-align: left;
+      }
     </style>
   </head>
   <body>
@@ -439,35 +451,35 @@
         const sheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-      // Helper to extract FQDN from a URL
-      function getFQDN(url) {
-      try {
-        let hostname = new URL(url).hostname;
-        return hostname.replace(/^www\./, "");
-        } catch {
-          return url;
+        // Helper to extract FQDN from a URL
+        function getFQDN(url) {
+          try {
+            let hostname = new URL(url).hostname;
+            return hostname.replace(/^www\./, "");
+          } catch {
+            return url;
+          }
         }
-      }
 
-      urls = json
-        .slice(1)
-        .map((row) => row[colIndex])
-        .filter((u) => !!u)
-        .map(getFQDN);
-      console.log("Extracted URLs:", urls);
+        urls = json
+          .slice(1)
+          .map((row) => row[colIndex])
+          .filter((u) => !!u)
+          .map(getFQDN);
+        console.log("Extracted URLs:", urls);
 
-      // Create table with only the first column (URLs)
-      const table = document.getElementById("resultsTable");
-      const tbody = table.querySelector("tbody");
-      const theadRow = document.getElementById("resultsHeader");
-      theadRow.innerHTML = `<th>URL Used</th>`;
-      tbody.innerHTML = "";
-      urls.forEach(url => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${url}</td>`;
-        tbody.appendChild(row);
-      });
-      table.style.display = "table";
+        // Create table with only the first column (URLs)
+        const table = document.getElementById("resultsTable");
+        const tbody = table.querySelector("tbody");
+        const theadRow = document.getElementById("resultsHeader");
+        theadRow.innerHTML = `<th>URL Used</th>`;
+        tbody.innerHTML = "";
+        urls.forEach((url) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${url}</td>`;
+          tbody.appendChild(row);
+        });
+        table.style.display = "table";
       }
 
       document.getElementById("searchBtn").onclick = async function (event) {
@@ -520,17 +532,19 @@
         }
 
         for (const url of urls) {
-           // Rate limit: max 100 requests per minute (1 request every 600ms)
-           const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
+          // Rate limit: max 100 requests per minute (1 request every 600ms)
+          const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
             query + "+"
           )}&siteSearch:${encodeURIComponent(url)}`;
 
-          await new Promise(resolve => setTimeout(resolve, 600));
-          
+          await new Promise((resolve) => setTimeout(resolve, 600));
+
           try {
             const res = await fetch(searchUrl);
             if (res.status === 429) {
-              showError("Google says: Too many requests (error 429). Please check your API billing or try again later.");
+              showError(
+                "Google says: Too many requests (error 429). Please check your API billing or try again later."
+              );
               throw new Error("Rate limit exceeded");
             }
             const data = await res.json();
@@ -578,17 +592,16 @@
       };
     </script>
 
-   <div id="errorBox" style="display:none; margin:20px auto; max-width:600px; background:#fdecea; color:#b71c1c; border:1px solid #f5c6cb; border-radius:6px; padding:14px; font-size:15px; text-align:left;">
-   </div>
-   <script>
+    <div id="errorBox" class="errorBox"></div>
+    <script>
       function showError(message) {
-         const errorBox = document.getElementById("errorBox");
-         errorBox.textContent = message;
-         errorBox.style.display = "block";
-         setTimeout(() => {
-            errorBox.style.display = "none";
-         }, 6000);
+        const errorBox = document.getElementById("errorBox");
+        errorBox.textContent = message;
+        errorBox.style.display = "block";
+        setTimeout(() => {
+          errorBox.style.display = "none";
+        }, 6000);
       }
-   </script>
+    </script>
   </body>
 </html>

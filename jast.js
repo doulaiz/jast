@@ -2,6 +2,8 @@
 document.addEventListener("DOMContentLoaded", function () {
    const excelInput = document.getElementById("excelFile");
    if (excelInput) excelInput.value = "";
+   // Populate search history datalist on load
+   populateSearchHistory();
 });
 
 // Show/hide sheet/column selects based on Excel file loaded
@@ -40,6 +42,50 @@ window.addEventListener("keydown", function (event) {
 
 let workbook;
 let urls = [];
+
+// ----- Search history (localStorage) -----
+const HISTORY_KEY = "searchHistory";
+const HISTORY_LIMIT = 15;
+
+function getSearchHistory() {
+   try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+   } catch {
+      return [];
+   }
+}
+
+function saveSearchHistory(list) {
+   try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+   } catch {
+      // ignore quota errors
+   }
+}
+
+function addToSearchHistory(query) {
+   const q = (query || "").trim();
+   if (!q) return;
+   let history = getSearchHistory();
+   // remove if exists then unshift to keep most-recent first
+   history = history.filter((item) => item.toLowerCase() !== q.toLowerCase());
+   history.unshift(q);
+   if (history.length > HISTORY_LIMIT) history = history.slice(0, HISTORY_LIMIT);
+   saveSearchHistory(history);
+}
+
+function populateSearchHistory() {
+   const dataList = document.getElementById("searchHistoryList");
+   if (!dataList) return;
+   dataList.innerHTML = "";
+   const history = getSearchHistory();
+   history.forEach((q) => {
+      const opt = document.createElement("option");
+      opt.value = q;
+      dataList.appendChild(opt);
+   });
+}
 
 // Load saved settings
 let apiKey = localStorage.getItem("googleApiKey") || "";
@@ -170,6 +216,9 @@ searchBtn.onclick = async function (event) {
       alert("Please enter a search term.");
       return;
    }
+   // Remember query in history
+   addToSearchHistory(query);
+   populateSearchHistory();
    if (!urls.length) {
       alert("No URLs loaded from Excel.");
       return;

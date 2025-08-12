@@ -233,7 +233,7 @@ searchBtn.onclick = async function (event) {
             <td>${numResults}</td>
             ${Array.from({ length: snippetCount }, (_, i) =>
             snippets[i]
-               ? `<td class="clickable-snippet" onclick="window.open('${snippets[i].link}', '_blank')">
+               ? `<td>
                     <div>${snippets[i].html}</div>
                     <div class="snippet-link">
                      <a href="${snippets[i].link}" target="_blank" >${snippets[i].link}</a>

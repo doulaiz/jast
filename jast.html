@@ -545,20 +545,12 @@
 
         let completed = 0;
 
-        // Helper to bold search matches
-        function boldMatches(text, query) {
-          if (!text || !query) return text;
-          // Escape regex special chars in query
-          const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const regex = new RegExp(escaped, "gi");
-          return text.replace(regex, (match) => `<b>${match}</b>`);
-        }
 
         for (const url of urls) {
           // Rate limit: max 100 requests per minute (1 request every 600ms)
           const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
-            query + "+"
-          )}&siteSearch:${encodeURIComponent(url)}`;
+            query
+          )}&siteSearch=${encodeURIComponent(url)}`;
 
           await new Promise((resolve) => setTimeout(resolve, 600));
 
@@ -574,16 +566,20 @@
 
             const numResults = data.searchInformation?.totalResults || 0;
             const snippets = data.items
-              ? data.items.slice(0, snippetCount).map((i) => i.snippet)
+              ? data.items.slice(0, snippetCount).map((i) => ({
+                 html: i.htmlSnippet,
+                 link: i.link
+               }))
               : [];
 
             const row = document.createElement("tr");
             row.innerHTML = `
-            <td>${boldMatches(url, query)}</td>
+            <td>${url}</td>
             <td>${numResults}</td>
             ${Array.from(
               { length: snippetCount },
-              (_, i) => `<td>${boldMatches(snippets[i] || "", query)}</td>`
+              (_, i) =>
+               `<td class="clickable-snippet">${snippets[i] ? `<a href="${snippets[i].link}" target="_blank">${snippets[i].html}</a>` : ""}</td>`
             ).join("")}
           `;
             tbody.appendChild(row);

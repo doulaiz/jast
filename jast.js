@@ -61,7 +61,9 @@ settingsBtn.onclick = () => {
 saveSettingsBtn.onclick = () => {
   apiKey = document.getElementById("apiKeyInput").value.trim();
   cx = document.getElementById("cxInput").value.trim();
-  snippetCount = parseInt(document.getElementById("snippetCountInput").value.trim(), 10) || 5;
+  snippetCount =
+    parseInt(document.getElementById("snippetCountInput").value.trim(), 10) ||
+    5;
 
   localStorage.setItem("googleApiKey", apiKey);
   localStorage.setItem("googleCx", cx);

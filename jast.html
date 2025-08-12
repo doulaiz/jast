@@ -302,14 +302,15 @@
     <div id="settingsModal" class="modal">
       <div class="modal-content">
         <h2>Settings</h2>
+        <label for="snippetCountInput">Number of Snippets per search</label>
+        <input type="number" id="snippetCountInput" min="1" max="10" />
+        <br />
+        <br />
         <label for="apiKeyInput">Google API Key</label>
         <input type="text" id="apiKeyInput" />
 
         <label for="cxInput">Custom Search Engine ID</label>
         <input type="text" id="cxInput" />
-
-        <label for="snippetCountInput">Number of Snippets</label>
-        <input type="number" id="snippetCountInput" min="1" max="10" />
 
         <div style="display: flex; justify-content: flex-end">
           <button class="btn" id="saveSettingsBtn">Save</button>

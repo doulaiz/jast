@@ -454,7 +454,20 @@
         .map((row) => row[colIndex])
         .filter((u) => !!u)
         .map(getFQDN);
-        console.log("Extracted URLs:", urls);
+      console.log("Extracted URLs:", urls);
+
+      // Create table with only the first column (URLs)
+      const table = document.getElementById("resultsTable");
+      const tbody = table.querySelector("tbody");
+      const theadRow = document.getElementById("resultsHeader");
+      theadRow.innerHTML = `<th>URL Used</th>`;
+      tbody.innerHTML = "";
+      urls.forEach(url => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${url}</td>`;
+        tbody.appendChild(row);
+      });
+      table.style.display = "table";
       }
 
       document.getElementById("searchBtn").onclick = async function (event) {
@@ -507,9 +520,13 @@
         }
 
         for (const url of urls) {
-          const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
-            query
-          )}+site:${encodeURIComponent(url)}`;
+           // Rate limit: max 100 requests per minute (1 request every 600ms)
+           const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
+            query + "+"
+          )}&siteSearch:${encodeURIComponent(url)}`;
+
+          await new Promise(resolve => setTimeout(resolve, 600));
+          
           try {
             const res = await fetch(searchUrl);
             const data = await res.json();

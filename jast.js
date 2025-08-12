@@ -279,3 +279,7 @@ function showError(message) {
       errorBox.style.display = "none";
    }, 6000);
 }
+
+document.getElementById('wbaLink').onclick = function () {
+   window.open('https://www.worldbenchmarkingalliance.org/', '_blank');
+};

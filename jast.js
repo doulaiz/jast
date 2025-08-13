@@ -272,7 +272,7 @@ searchBtn.onclick = async function (event) {
          const data = await res.json();
 
          const numResults = data.searchInformation?.totalResults || 0;
-         const snippets = data.items
+           const snippets = data.items
             ? data.items.slice(0, snippetCount).map((i) => ({
                html: i.htmlSnippet,
                link: i.link,
@@ -379,9 +379,25 @@ confirmExportBtn.onclick = function () {
    const filenameRaw = (exportFilenameInput.value || "Jast_Results.xlsx").trim();
    const filename = filenameRaw.endsWith(".xlsx") ? filenameRaw : `${filenameRaw}.xlsx`;
 
-   // Build export sheet from the on-screen results table
    const table = document.getElementById("resultsTable");
-   const resultsSheet = XLSX.utils.table_to_sheet(table);
+   // Convert table to array of arrays (object array of arrays)
+   const rows = Array.from(table.querySelectorAll("tr"));
+   const tableData = rows.map(row =>
+      Array.from(row.querySelectorAll("th,td")).map(cell => cell.textContent.replace(/\s+/g, " ").trim())
+   );
+
+   console.log("table data", tableData);
+
+   const searchedText = document.getElementById("searchQuery").value.trim();
+
+   tableData.unshift(["Search field:", searchedText]);
+   tableData.unshift([""]);
+
+   const resultsSheet = XLSX.utils.aoa_to_sheet(tableData);
+   
+   // Make cell A1 bold in the results sheet
+   if (!resultsSheet["A1"]) resultsSheet["A1"] = { t: "s", v: tableData[0][0] };
+   resultsSheet["A1"].s = { font: { bold: true } };
 
    // Collect selected original columns to append as a separate sheet
    const selectedIdx = Array.from(exportColumnsContainer.querySelectorAll('input[type="checkbox"]:checked'))
@@ -390,6 +406,7 @@ confirmExportBtn.onclick = function () {
 
    const wb = XLSX.utils.book_new();
    XLSX.utils.book_append_sheet(wb, resultsSheet, "Results");
+
 
    if (selectedIdx.length && Array.isArray(originalSheetJson) && originalSheetJson.length) {
       // Create a filtered view of originalSheetJson with only selected columns

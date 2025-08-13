@@ -330,7 +330,7 @@ exportBtn.onclick = function (event) {
    const now = new Date();
    const pad = (n) => n.toString().padStart(2, "0");
    const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-   exportFilenameInput.value = `jast_result_${dateStr}_${query}.xlsx`;
+   exportFilenameInput.value = `Jast_Result_${dateStr}_${query}.xlsx`;
 
    // Populate columns from original Excel
    exportColumnsContainer.innerHTML = "";
@@ -376,7 +376,7 @@ window.addEventListener("click", (e) => {
 });
 
 confirmExportBtn.onclick = function () {
-   const filenameRaw = (exportFilenameInput.value || "jast_results.xlsx").trim();
+   const filenameRaw = (exportFilenameInput.value || "Jast_Results.xlsx").trim();
    const filename = filenameRaw.endsWith(".xlsx") ? filenameRaw : `${filenameRaw}.xlsx`;
 
    // Build export sheet from the on-screen results table

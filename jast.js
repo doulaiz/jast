@@ -37,11 +37,13 @@ window.addEventListener("keydown", function (event) {
    if (event.key === "Escape") {
       document.getElementById("settingsModal").style.display = "none";
       document.getElementById("infoModal").style.display = "none";
+      document.getElementById("exportModal").style.display = "none";
    }
 });
 
 let workbook;
 let urls = [];
+let originalSheetJson = null; // cache of original Excel sheet (rows as arrays)
 
 // ----- Search history (localStorage) -----
 const HISTORY_KEY = "searchHistory";
@@ -156,6 +158,7 @@ function loadColumns() {
    if (!sheetName) return;
    const sheet = workbook.Sheets[sheetName];
    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+   originalSheetJson = json;
    const firstRow = json[0];
    const colSelect = document.getElementById("columnSelect");
    colSelect.innerHTML = "";
@@ -308,15 +311,99 @@ searchBtn.onclick = async function (event) {
    document.getElementById("exportBtn").style.display = "inline-block";
 };
 
-// Export table to Excel
+// Export flow with modal options
 const exportBtn = document.getElementById("exportBtn");
-exportBtn.onclick = function () {
+const exportModal = document.getElementById("exportModal");
+const exportFilenameInput = document.getElementById("exportFilename");
+const exportColumnsContainer = document.getElementById("exportColumnsContainer");
+const cancelExportBtn = document.getElementById("cancelExportBtn");
+const confirmExportBtn = document.getElementById("confirmExportBtn");
+
+exportBtn.onclick = function (event) {
    event.preventDefault();
+   if (!document.getElementById("resultsTable")?.rows?.length) {
+      showError("No results to export yet.");
+      return;
+   }
+   // Populate filename default
+   const query = document.getElementById("searchQuery").value.trim().replace(/[^a-zA-Z0-9]/g, "_").replace(/_+/g, "_");
+   const now = new Date();
+   const pad = (n) => n.toString().padStart(2, "0");
+   const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+   exportFilenameInput.value = `Jast_Result_${dateStr}_${query}.xlsx`;
+
+   // Populate columns from original Excel
+   exportColumnsContainer.innerHTML = "";
+   try {
+      const header = originalSheetJson && originalSheetJson[0] ? originalSheetJson[0] : [];
+      if (!header.length) {
+         const note = document.createElement("div");
+         note.textContent = "No original Excel loaded or header is empty.";
+         exportColumnsContainer.appendChild(note);
+      } else {
+         header.forEach((name, idx) => {
+            const id = `exp_col_${idx}`;
+            const wrapper = document.createElement("div");
+            wrapper.className = "export-column-option";
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.id = id;
+            cb.value = idx;
+            cb.checked = false;
+            cb.className = "export-column-checkbox";
+            const label = document.createElement("label");
+            label.htmlFor = id;
+            label.textContent = name || `Column ${idx + 1}`;
+            label.className = "export-column-label";
+            wrapper.appendChild(label);
+            wrapper.appendChild(cb);
+            exportColumnsContainer.appendChild(wrapper);
+         });
+      }
+   } catch (e) {
+      exportColumnsContainer.textContent = "Unable to load columns.";
+   }
+   exportModal.style.display = "block";
+};
+
+cancelExportBtn.onclick = () => {
+   exportModal.style.display = "none";
+};
+
+// Close export modal when clicking outside
+window.addEventListener("click", (e) => {
+   if (e.target === exportModal) exportModal.style.display = "none";
+});
+
+confirmExportBtn.onclick = function () {
+   const filenameRaw = (exportFilenameInput.value || "Jast_Results.xlsx").trim();
+   const filename = filenameRaw.endsWith(".xlsx") ? filenameRaw : `${filenameRaw}.xlsx`;
+
+   // Build export sheet from the on-screen results table
    const table = document.getElementById("resultsTable");
-   const ws = XLSX.utils.table_to_sheet(table);
+   const resultsSheet = XLSX.utils.table_to_sheet(table);
+
+   // Collect selected original columns to append as a separate sheet
+   const selectedIdx = Array.from(exportColumnsContainer.querySelectorAll('input[type="checkbox"]:checked'))
+      .map((cb) => parseInt(cb.value, 10))
+      .filter((n) => !Number.isNaN(n));
+
    const wb = XLSX.utils.book_new();
-   XLSX.utils.book_append_sheet(wb, ws, "Results");
-   XLSX.writeFile(wb, "jast_results.xlsx");
+   XLSX.utils.book_append_sheet(wb, resultsSheet, "Results");
+
+   if (selectedIdx.length && Array.isArray(originalSheetJson) && originalSheetJson.length) {
+      // Create a filtered view of originalSheetJson with only selected columns
+      const filtered = originalSheetJson.map((row) => selectedIdx.map((i) => row?.[i]));
+      // Header names for the selected indices
+      const header = selectedIdx.map((i) => (originalSheetJson[0]?.[i] || `Column ${i + 1}`));
+      // Ensure header in first row
+      if (filtered.length) filtered[0] = header;
+      const wsExtra = XLSX.utils.aoa_to_sheet(filtered);
+      XLSX.utils.book_append_sheet(wb, wsExtra, "Original Columns");
+   }
+
+   XLSX.writeFile(wb, filename);
+   exportModal.style.display = "none";
 };
 
 // Error box helper

@@ -272,7 +272,7 @@ searchBtn.onclick = async function (event) {
          const data = await res.json();
 
          const numResults = data.searchInformation?.totalResults || 0;
-           const snippets = data.items
+         const snippets = data.items
             ? data.items.slice(0, snippetCount).map((i) => ({
                html: i.htmlSnippet,
                link: i.link,
@@ -380,6 +380,7 @@ confirmExportBtn.onclick = function () {
    const filename = filenameRaw.endsWith(".xlsx") ? filenameRaw : `${filenameRaw}.xlsx`;
 
    const table = document.getElementById("resultsTable");
+
    // Convert table to array of arrays (object array of arrays)
    const rows = Array.from(table.querySelectorAll("tr"));
    const tableData = rows.map(row =>
@@ -390,34 +391,83 @@ confirmExportBtn.onclick = function () {
 
    const searchedText = document.getElementById("searchQuery").value.trim();
 
-   tableData.unshift(["Search field:", searchedText]);
-   tableData.unshift([""]);
+   tableData.unshift(["Searched terms:", searchedText]);
 
-   const resultsSheet = XLSX.utils.aoa_to_sheet(tableData);
-   
-   // Make cell A1 bold in the results sheet
-   if (!resultsSheet["A1"]) resultsSheet["A1"] = { t: "s", v: tableData[0][0] };
-   resultsSheet["A1"].s = { font: { bold: true } };
 
-   // Collect selected original columns to append as a separate sheet
+   // Insert the Extra columns
    const selectedIdx = Array.from(exportColumnsContainer.querySelectorAll('input[type="checkbox"]:checked'))
       .map((cb) => parseInt(cb.value, 10))
       .filter((n) => !Number.isNaN(n));
+   const extraColSize = selectedIdx.length;
+
+   if (selectedIdx.length && Array.isArray(originalSheetJson) && originalSheetJson.length) {
+      const filtered = originalSheetJson.map((row) => selectedIdx.map((i) => row?.[i]));
+      const header = selectedIdx.map((i) => (originalSheetJson[0]?.[i] || `Column ${i + 1}`));
+      if (filtered.length) filtered[0] = header;
+
+      for (let i = 0; i < filtered.length; i++) {
+         const resultRow = tableData[i + 1] ? tableData[i + 1].slice() : [];
+         const newRow = [
+            ...filtered[i],
+            " ",
+            ...resultRow
+         ];
+         tableData[i + 1] = newRow;
+      }
+   }
+
+   // Format the document
+   const resultsSheet = XLSX.utils.aoa_to_sheet(tableData);
+   // Make the second row (index 1) bold
+   if (tableData.length > 1) {
+      const secondRow = tableData[1];
+      for (let c = 0; c < secondRow.length; c++) {
+         const cellRef = XLSX.utils.encode_cell({ r: 1, c });
+         if (!resultsSheet[cellRef]) continue;
+         if (!resultsSheet[cellRef].s) resultsSheet[cellRef].s = {};
+         resultsSheet[cellRef].s.font = { bold: true };
+      }
+   }
+
+   if (!resultsSheet["!cols"]) resultsSheet["!cols"] = [];
+   for (let i = 0; i < extraColSize; i++) {
+      resultsSheet["!cols"][i] = { wch: 10 };
+   }
+   resultsSheet["!cols"][extraColSize] = { wch: 3 };
+   resultsSheet["!cols"][extraColSize + 1] = { wch: 15 };
+   resultsSheet["!cols"][extraColSize + 2] = { wch: 15 };
+   if (tableData.length > 1 && !isNaN(snippetCount)) {
+      for (let i = 0; i < snippetCount; i++) {
+         resultsSheet["!cols"][i + 3 + extraColSize] = { wch: 30 };
+      }
+   }
+
+   if (!resultsSheet["!rows"]) resultsSheet["!rows"] = [];
+   if (tableData.length > 1) {
+      const secondRow = tableData[1];
+      for (let c = 0; c < secondRow.length; c++) {
+         const cellRef = XLSX.utils.encode_cell({ r: 1, c });
+         if (!resultsSheet[cellRef]) continue;
+         if (!resultsSheet[cellRef].s) resultsSheet[cellRef].s = {};
+         resultsSheet[cellRef].s.font = { bold: true };
+      }
+   }
+   for (let i = 2; i < 2 + urls.length; i++) {
+      if (!resultsSheet["!rows"][i]) resultsSheet["!rows"][i] = {};
+      resultsSheet["!rows"][i] = { hpt: 100 };
+      // Enable text wrap for all cells in this row
+      for (let c = 0; c < tableData[1].length; c++) {
+         const cellRef = XLSX.utils.encode_cell({ r: i, c });
+         if (resultsSheet[cellRef]) {
+            if (!resultsSheet[cellRef].s) resultsSheet[cellRef].s = {};
+            if (!resultsSheet[cellRef].s.alignment) resultsSheet[cellRef].s.alignment = {};
+            resultsSheet[cellRef].s.alignment.wrapText = '1';
+         }
+      }
+   }
 
    const wb = XLSX.utils.book_new();
    XLSX.utils.book_append_sheet(wb, resultsSheet, "Results");
-
-
-   if (selectedIdx.length && Array.isArray(originalSheetJson) && originalSheetJson.length) {
-      // Create a filtered view of originalSheetJson with only selected columns
-      const filtered = originalSheetJson.map((row) => selectedIdx.map((i) => row?.[i]));
-      // Header names for the selected indices
-      const header = selectedIdx.map((i) => (originalSheetJson[0]?.[i] || `Column ${i + 1}`));
-      // Ensure header in first row
-      if (filtered.length) filtered[0] = header;
-      const wsExtra = XLSX.utils.aoa_to_sheet(filtered);
-      XLSX.utils.book_append_sheet(wb, wsExtra, "Original Columns");
-   }
 
    XLSX.writeFile(wb, filename);
    exportModal.style.display = "none";

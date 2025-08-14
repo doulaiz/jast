@@ -22,22 +22,38 @@ document.getElementById("excelFile")?.addEventListener("change", function () {
 const infoBtn = document.getElementById("infoBtn");
 const infoModal = document.getElementById("infoModal");
 const closeInfoBtn = document.getElementById("closeInfoBtn");
-infoBtn.onclick = () => {
-   infoModal.style.display = "block";
-};
+
+// Modal helpers to keep only one open at a time
+function getAllModals() {
+   const ids = ["settingsModal", "infoModal", "exportModal"];
+   return ids
+      .map((id) => document.getElementById(id))
+      .filter((el) => !!el);
+}
+
+function closeAllModals() {
+   getAllModals().forEach((m) => (m.style.display = "none"));
+}
+
+function openModal(modalEl) {
+   closeAllModals();
+   modalEl.style.display = "block";
+}
+
+infoBtn.onclick = () => openModal(infoModal);
 closeInfoBtn.onclick = () => {
    infoModal.style.display = "none";
 };
+// Close on backdrop click (generic)
 window.addEventListener("click", function (event) {
-   if (event.target == infoModal) infoModal.style.display = "none";
+   const isBackdrop = getAllModals().some((m) => event.target === m);
+   if (isBackdrop) closeAllModals();
 });
 
 // ESC key closes modals
 window.addEventListener("keydown", function (event) {
    if (event.key === "Escape") {
-      document.getElementById("settingsModal").style.display = "none";
-      document.getElementById("infoModal").style.display = "none";
-      document.getElementById("exportModal").style.display = "none";
+      closeAllModals();
    }
 });
 
@@ -103,7 +119,7 @@ settingsBtn.onclick = () => {
    document.getElementById("apiKeyInput").value = apiKey;
    document.getElementById("cxInput").value = cx;
    document.getElementById("snippetCountInput").value = snippetCount;
-   modal.style.display = "block";
+   openModal(modal);
 };
 
 saveSettingsBtn.onclick = () => {
@@ -120,11 +136,6 @@ saveSettingsBtn.onclick = () => {
    modal.style.display = "none";
 };
 
-window.onclick = function (event) {
-   if (event.target == modal) {
-      modal.style.display = "none";
-   }
-};
 
 // Excel file change
 const excelFileEl = document.getElementById("excelFile");
@@ -363,17 +374,10 @@ exportBtn.onclick = function (event) {
    } catch (e) {
       exportColumnsContainer.textContent = "Unable to load columns.";
    }
-   exportModal.style.display = "block";
+   openModal(exportModal);
 };
 
-cancelExportBtn.onclick = () => {
-   exportModal.style.display = "none";
-};
-
-// Close export modal when clicking outside
-window.addEventListener("click", (e) => {
-   if (e.target === exportModal) exportModal.style.display = "none";
-});
+cancelExportBtn.onclick = () => closeAllModals();
 
 confirmExportBtn.onclick = function () {
    const filenameRaw = (exportFilenameInput.value || "Jast_Results.xlsx").trim();
@@ -403,7 +407,7 @@ confirmExportBtn.onclick = function () {
    }
 
    XLSX.writeFile(wb, filename);
-   exportModal.style.display = "none";
+   closeAllModals();
 };
 
 // Error box helper

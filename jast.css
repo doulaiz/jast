@@ -30,20 +30,10 @@ header {
    color: #202124;
 }
 
-h1 {
-   font-size: 60px;
-   font-weight: 400;
-   margin-top: 100px;
-   margin-bottom: 40px;
-   letter-spacing: 2px;
-   color: #4285f4;
-}
-
 .jast-title {
    font-family: "Product Sans", Arial, sans-serif;
    font-size: 60px;
-   font-weight: 500;
-   margin-top: 100px;
+   margin-top: 80px;
    margin-bottom: 40px;
    font-weight: 700;
    letter-spacing: 1px;
@@ -82,8 +72,8 @@ h1 {
 }
 
 .btn {
-   background-color: #f8f9fa;
-   border: 1px solid #f8f9fa;
+   background-color: #e8eaed;
+   border: 1px solid #e8eaed;
    border-radius: 4px;
    padding: 8px 16px;
    margin: 8px;
@@ -190,7 +180,7 @@ th {
    margin: 15% auto;
    padding: 20px;
    border: 1px solid #dadce0;
-   width: 300px;
+   width: 400px;
    border-radius: 8px;
    text-align: left;
 }
@@ -262,12 +252,6 @@ footer {
    word-break: break-all;
    text-decoration: none;
    padding-top: 8px;
-}
-
-/* Utility */
-.right-actions {
-   display: flex;
-   justify-content: flex-end;
 }
 
 .exportColumnsContainer {

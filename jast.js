@@ -442,31 +442,7 @@ confirmExportBtn.onclick = function () {
    resultsSheet["!cols"][extraColSize + 2] = { wch: 15 };
    if (tableData.length > 1 && !isNaN(snippetCount)) {
       for (let i = 0; i < snippetCount; i++) {
-         resultsSheet["!cols"][i + 3 + extraColSize] = { wch: 30 };
-      }
-   }
-
-   if (!resultsSheet["!rows"]) resultsSheet["!rows"] = [];
-   if (tableData.length > 1) {
-      const secondRow = tableData[1];
-      for (let c = 0; c < secondRow.length; c++) {
-         const cellRef = XLSX.utils.encode_cell({ r: 1, c });
-         if (!resultsSheet[cellRef]) continue;
-         if (!resultsSheet[cellRef].s) resultsSheet[cellRef].s = {};
-         resultsSheet[cellRef].s.font = { bold: true };
-      }
-   }
-   for (let i = 2; i < 2 + urls.length; i++) {
-      if (!resultsSheet["!rows"][i]) resultsSheet["!rows"][i] = {};
-      resultsSheet["!rows"][i] = { hpt: 100 };
-      // Enable text wrap for all cells in this row
-      for (let c = 0; c < tableData[1].length; c++) {
-         const cellRef = XLSX.utils.encode_cell({ r: i, c });
-         if (resultsSheet[cellRef]) {
-            if (!resultsSheet[cellRef].s) resultsSheet[cellRef].s = {};
-            if (!resultsSheet[cellRef].s.alignment) resultsSheet[cellRef].s.alignment = {};
-            resultsSheet[cellRef].s.alignment.wrapText = '1';
-         }
+         resultsSheet["!cols"][i + 3 + extraColSize] = { wch: 50 };
       }
    }
 

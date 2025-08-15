@@ -12,15 +12,15 @@ https://doulaiz.github.io/jast/
 ## Usage
 
 1. Open the app
-2. Click the gear icon (⚙) to open Settings and paste:
-   - Google API Key
+2. Click the gear icon (⚙) to open Settings and set:
+   - Google API Key (more info  [click here](https://developers.google.com/custom-search/v1/overview#prerequisites) )
    - Custom Search Engine (CSE) ID - There is a default value that should work for standard needs, but you can create your own
 3. Choose your Excel file (.xlsx or .xls) where one column should have a list of URLs
 4. Select the target sheet and column containing URLs/domains
    - The app will list the URLs as the first column in the table
 5. Enter your search term and click "Search"
-6. Click "Export to Excel" to download in Excel format
-7. In the Export menu, you can include original colums copied from the input file to be collated to the exported one  
+6. Once the search is finished, click "Export to Excel" to download the results in Excel format
+8. In the Export menu, you can include original colums copied from the input file to be collated onto the exported one  
 
 ## Requirements
 

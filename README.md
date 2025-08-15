@@ -1,6 +1,6 @@
 # JAST (Just Another Search Tool)
 
-A lightweight, single-page web app to batch-search on Google across a list of domains/URLs loaded from an Excel file, preview the top snippets, and export results back to Excel.
+A lightweight, single-page web app to batch-search using Google API across a list of domains/URLs loaded from an Excel file, preview the top snippets, and export results back to Excel.
 
 ## Try it here:
 https://doulaiz.github.io/jast/

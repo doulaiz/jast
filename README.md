@@ -67,4 +67,4 @@ jast2/
 
 ## License
 
-This is a simple personal project template. Use at your own discretion.
+MIT License. See the `LICENSE` file for details.

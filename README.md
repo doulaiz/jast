@@ -13,7 +13,7 @@ https://doulaiz.github.io/jast/
 
 1. Open the app
 2. Click the gear icon (⚙) to open Settings and set:
-   - Google API Key (more info  [click here](https://developers.google.com/custom-search/v1/overview#prerequisites) )
+   - Google API Key (more info [here](https://developers.google.com/custom-search/v1/overview#prerequisites))
    - Custom Search Engine (CSE) ID - There is a default value that should work for standard needs, but you can create your own
 3. Choose your Excel file (.xlsx or .xls) where one column should have a list of URLs
 4. Select the target sheet and column containing URLs/domains

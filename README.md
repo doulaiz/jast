@@ -35,6 +35,7 @@ jast2/
 ├─ index.html     # Main HTML page (links the CSS and JS)
 ├─ jast.css       # All styles
 ├─ jast.js        # All application logic
+├─ LICENCE        # MIT Licence file
 └─ README.md      # This file
 ```
 
@@ -52,7 +53,7 @@ jast2/
 ## Notes & limits
 
 - Rate limiting: The app waits ~600 ms between requests (~100/min).
-- The free API key from Google, will let you do 100 requests per day. So if your Excel has 50 URLs, you will be able to only do 2 searches.
+- The free API key from Google, will let you do 100 requests per day. So, if your Excel has 50 URLs, you will be able to only do 2 Jast-searches.
 - Google APIs may require proper billing setup to allow a sufficient quota.
 
 ## Troubleshooting

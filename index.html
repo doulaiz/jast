@@ -23,13 +23,17 @@
    <datalist id="searchHistoryList"></datalist>
 
    <br /><br />
+   <div style="display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 12px;">
+      <label for="excelFile"
+         style="font-weight: 500; color: #424242; letter-spacing: 0.02em; min-width: 160px; text-align: right;">
+         Excel file with URLs:
+      </label>
+      <input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file with URLs" class="btn"
+         style="width: auto" />
 
-   <input type="file" id="excelFile" accept=".xlsx, .xls" title="Select Excel file with URLs" class="btn"
-      style="width: auto" />
-   <select id="sheetSelect" style="display: none" title="Choose which sheet from your Excel file to use."></select>
-   <select id="columnSelect" style="display: none"
-      title="Choose which column from your Excel file to use."></select><br />
-
+      <select id="sheetSelect" style="display: none" title="Sheet from your Excel file to use."></select>
+      <select id="columnSelect" style="display: none" title="Column from your Excel file to use."></select><br />
+   </div>
    <button id="searchBtn" class="btn" type="button">Search</button>
    <button id="exportBtn" class="btn" type="button" title="Export to Excel" style="display: none">
       Export to Excel

@@ -211,7 +211,7 @@ function extractUrls() {
    const table = document.getElementById("resultsTable");
    const tbody = table.querySelector("tbody");
    const theadRow = document.getElementById("resultsHeader");
-   theadRow.innerHTML = `<th>URL Used</th>`;
+   theadRow.innerHTML = `<th>URLs to be used</th>`;
    tbody.innerHTML = "";
    urls.forEach((url) => {
       const row = document.createElement("tr");
@@ -270,7 +270,9 @@ searchBtn.onclick = async function (event) {
          query
       )}&siteSearch=${encodeURIComponent(url)}`;
 
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      if (urls.length > 50) {
+         await new Promise((resolve) => setTimeout(resolve, 600));
+      }
 
       try {
          const res = await fetch(searchUrl);
